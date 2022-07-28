@@ -7,7 +7,7 @@ from typing_extensions import Self
 import zstd
 
 
-__all__ = ['get_compressions', 'is_compression', 'compress', 'decompress']
+__all__ = ['compress', 'decompress', 'get_compressions', 'is_compression']
 
 
 class Compression(object):

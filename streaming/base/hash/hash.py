@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, Set
 import xxhash
 
 
-__all__ = ['get_hashes', 'is_hash', 'get_hash']
+__all__ = ['get_hash', 'get_hashes', 'is_hash']
 
 
 def _collect() -> Dict[str, Callable[[bytes], Any]]:
