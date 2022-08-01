@@ -7,7 +7,8 @@ from typing_extensions import Self
 import zstd
 
 
-__all__ = ['compress', 'decompress', 'get_compressions', 'is_compression']
+__all__ = ['compress', 'decompress', 'get_compression_extension', 'get_compressions',
+           'is_compression']
 
 
 class Compression(object):
@@ -185,7 +186,7 @@ def get_compressions() -> Set[str]:
     return set(_algorithms)
 
 
-def is_compression(algo: str) -> bool:
+def is_compression(algo: Optional[str]) -> bool:
     """Get whether this compression algorithm is supported.
 
     Args:
@@ -197,7 +198,22 @@ def is_compression(algo: str) -> bool:
     return algo in _algorithms
 
 
-def compress(algo: str, data: bytes) -> bytes:
+def get_compression_extension(algo: Optional[str]) -> str:
+    """Get compressed filename extension.
+
+    Args:
+        algo (str): Compression.
+
+    Returns:
+        str: Filename extension.
+    """
+    if algo is None:
+        return None
+    obj = _algorithms[algo]
+    return obj.extension
+
+
+def compress(algo: Optional[str], data: bytes) -> bytes:
     """Compress arbitrary data.
 
     Args:
@@ -212,7 +228,7 @@ def compress(algo: str, data: bytes) -> bytes:
     return obj.compress(data)
 
 
-def decompress(algo: str, data: bytes) -> bytes:
+def decompress(algo: Optional[str], data: bytes) -> bytes:
     """Decompress data compressed by this algorithm.
 
     Args:
