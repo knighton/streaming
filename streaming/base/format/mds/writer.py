@@ -56,9 +56,11 @@ class MDSWriter(JointWriter):
 
     def _get_config(self) -> dict[str, Any]:
         obj = super()._get_config()
-        obj['column_names'] = self.column_names
-        obj['column_encodings'] = self.column_encodings
-        obj['column_sizes'] = self.column_sizes
+        obj.update({
+            'column_names': self.column_names,
+            'column_encodings': self.column_encodings,
+            'column_sizes': self.column_sizes
+        })
         return obj
 
     def _encode_joint_shard(self) -> bytes:

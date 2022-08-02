@@ -12,7 +12,7 @@ class XSVWriter(SplitWriter):
     def __init__(
         self,
         dirname: str,
-        columns: list[tuple[str, str]],
+        columns: dict[str, str],
         separator: str,
         compression: Optional[str] = None,
         hashes: Optional[list[str]] = None,
@@ -21,21 +21,23 @@ class XSVWriter(SplitWriter):
     ) -> None:
         super().__init__(dirname, compression, hashes, size_limit)
 
-        column_names, column_encodings = zip(*columns)
-        assert len(set(column_names)) == len(column_names)
-        for name in column_names:
+        self.columns = columns
+        self.column_names = []
+        self.column_encodings = []
+        for name in sorted(columns):
+            encoding = columns[name]
             assert newline not in name
             assert separator not in name
-        for encoding in column_encodings:
             assert is_xsv_encoding(encoding)
+            self.column_names.append(name)
+            self.column_encodings.append(encoding)
 
-        self.columns = columns
         self.separator = separator
         self.newline = newline
 
     def _encode_sample(self, sample: dict[str, Any]) -> bytes:
         values = []
-        for name, encoding in self.columns:
+        for name, encoding in zip(self.column_names, self.column_encodings):
             value = xsv_encode(encoding, sample[name])
             assert self.newline not in value
             assert self.separator not in value
@@ -46,15 +48,15 @@ class XSVWriter(SplitWriter):
     def _get_config(self) -> dict[str, Any]:
         obj = super()._get_config()
         obj.update({
-            'columns': self.columns,
+            'column_names': self.column_names,
+            'column_encodings': self.column_encodings,
             'separator': self.separator,
             'newline': self.newline
         })
         return obj
 
     def _encode_split_shard(self) -> tuple[bytes, bytes]:
-        column_names, _ = zip(*self.columns)
-        header = self.separator.join(column_names) + self.newline
+        header = self.separator.join(self.column_names) + self.newline
         header = header.encode('utf-8')
         data = b''.join([header] + self.new_samples)
         header_offset = len(header)
@@ -76,7 +78,7 @@ class CSVWriter(XSVWriter):
     def __init__(
         self,
         dirname: str,
-        columns: list[tuple[str, str]],
+        columns: dict[str, str],
         compression: Optional[str] = None,
         hashes: Optional[list[str]] = None,
         size_limit: Optional[int] = 1 << 26,
@@ -92,7 +94,7 @@ class TSVWriter(XSVWriter):
     def __init__(
         self,
         dirname: str,
-        columns: list[tuple[str, str]],
+        columns: dict[str, str],
         compression: Optional[str] = None,
         hashes: Optional[list[str]] = None,
         size_limit: Optional[int] = 1 << 26,

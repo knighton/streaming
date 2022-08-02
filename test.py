@@ -48,27 +48,23 @@ def get_dataset(num_samples):
 def main():
     samples = get_dataset(100_000)
 
-    compression = 'zstd:7'
-    hashes = 'sha1', 'xxh3_64'
-    size_limit = 1 << 20
-
     columns = {
         'number': 'int',
         'words': 'str',
     }
+    compression = 'zstd:7'
+    hashes = 'sha1', 'xxh3_64'
+    size_limit = 1 << 20
+
     with MDSWriter('data/mds', columns, compression, hashes, size_limit) as out:
         for x in samples:
             out.write(x)
 
-    columns2 = [
-        ['number', 'int'],
-        ['words', 'str'],
-    ]
-    with CSVWriter('data/csv', columns2, compression, hashes, size_limit) as out:
+    with CSVWriter('data/csv', columns, compression, hashes, size_limit) as out:
         for x in samples:
             out.write(x)
 
-    with TSVWriter('data/tsv', columns2, compression, hashes, size_limit) as out:
+    with TSVWriter('data/tsv', columns, compression, hashes, size_limit) as out:
         for x in samples:
             out.write(x)
 
