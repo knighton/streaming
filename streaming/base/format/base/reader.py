@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from typing import Any, Iterator, Optional
 
 
@@ -9,7 +8,7 @@ class FileInfo(object):
         self.hashes = hashes
 
 
-class Reader(Sequence):
+class Reader(object):
     """Provides random access to the samples of a shard.
 
     Args:
