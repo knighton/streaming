@@ -123,7 +123,7 @@ class Writer(object):
         }
 
     def _process_file(self, raw_data: bytes, raw_basename: str,
-                      zip_basename: Optional[str]) -> dict[str, Any]:
+                      zip_basename: Optional[str]) -> tuple[dict, Optional[dict]]:
         """Process and save a shard file (hash, compress, hash, write).
 
         Args:
@@ -147,10 +147,7 @@ class Writer(object):
         filename = os.path.join(self.dirname, basename)
         with open(filename, 'wb') as out:
             out.write(data)
-        return {
-            'raw': raw_info,
-            'zip': zip_info
-        }
+        return raw_info, zip_info
 
     def _get_config(self) -> dict[str, Any]:
         return {
@@ -257,12 +254,14 @@ class JointWriter(Writer):
         raise NotImplementedError
 
     def _flush_shard(self) -> None:
-        data_raw_basename, data_zip_basename = self._name_next_shard()
+        raw_data_basename, zip_data_basename = self._name_next_shard()
         raw_data = self._encode_joint_shard()
-        data_info = self._process_file(raw_data, data_raw_basename, data_zip_basename)
+        raw_data_info, zip_data_info = self._process_file(raw_data, raw_data_basename,
+                                                          zip_data_basename)
         obj = {
             'samples': len(self.new_samples),
-            'data': data_info,
+            'raw_data': raw_data_info,
+            'zip_data': zip_data_info
         }
         obj.update(self._get_config())
         self.shards.append(obj)
@@ -304,15 +303,19 @@ class SplitWriter(Writer):
         raise NotImplementedError
 
     def _flush_shard(self) -> None:
-        data_raw_basename, data_zip_basename = self._name_next_shard()
+        raw_data_basename, zip_data_basename = self._name_next_shard()
         meta_raw_basename, meta_zip_basename = self._name_next_shard('meta')
         raw_data, raw_meta = self._encode_split_shard()
-        data_info = self._process_file(raw_data, data_raw_basename, data_zip_basename)
-        meta_info = self._process_file(raw_meta, meta_raw_basename, meta_zip_basename)
+        raw_data_info, zip_data_info = self._process_file(raw_data, raw_data_basename,
+                                                          zip_data_basename)
+        raw_meta_info, zip_meta_info = self._process_file(raw_meta, meta_raw_basename,
+                                                          meta_zip_basename)
         obj = {
             'samples': len(self.new_samples),
-            'data': data_info,
-            'meta': meta_info,
+            'raw_data': raw_data_info,
+            'zip_data': zip_data_info,
+            'raw_meta': raw_meta_info,
+            'zip_meta': zip_meta_info
         }
         obj.update(self._get_config())
         self.shards.append(obj)

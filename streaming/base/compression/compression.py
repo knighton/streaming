@@ -198,7 +198,7 @@ def is_compression(algo: Optional[str]) -> bool:
     return algo in _algorithms
 
 
-def get_compression_extension(algo: Optional[str]) -> str:
+def get_compression_extension(algo: str) -> str:
     """Get compressed filename extension.
 
     Args:
@@ -207,8 +207,6 @@ def get_compression_extension(algo: Optional[str]) -> str:
     Returns:
         str: Filename extension.
     """
-    if algo is None:
-        return None
     obj = _algorithms[algo]
     return obj.extension
 
