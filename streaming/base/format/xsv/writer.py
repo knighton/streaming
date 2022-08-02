@@ -86,6 +86,12 @@ class CSVWriter(XSVWriter):
     ) -> None:
         super().__init__(dirname, columns, self.separator, compression, hashes, size_limit, newline)
 
+    def _get_config(self) -> dict[str, Any]:
+        obj = super()._get_config()
+        obj['format'] = self.format
+        del obj['separator']
+        return obj
+
 
 class TSVWriter(XSVWriter):
     format = 'tsv'
@@ -101,3 +107,9 @@ class TSVWriter(XSVWriter):
         newline: str = '\n'
     ) -> None:
         super().__init__(dirname, columns, self.separator, compression, hashes, size_limit, newline)
+
+    def _get_config(self) -> dict[str, Any]:
+        obj = super()._get_config()
+        obj['format'] = self.format
+        del obj['separator']
+        return obj

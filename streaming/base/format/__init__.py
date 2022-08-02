@@ -3,12 +3,15 @@ from typing import Any, Optional
 from .base.reader import Reader
 from .json import JSONReader, JSONWriter
 from .mds import MDSReader, MDSWriter
-from .xsv import CSVWriter, TSVWriter, XSVWriter
+from .xsv import CSVReader, CSVWriter, TSVReader, TSVWriter, XSVReader, XSVWriter
 
 
 _readers = {
+    'csv': CSVReader,
     'json': JSONReader,
-    'mds': MDSReader
+    'mds': MDSReader,
+    'tsv': TSVReader,
+    'xsv': XSVReader
 }
 
 
@@ -18,4 +21,5 @@ def reader_from_json(dirname: str, split: Optional[str], obj: dict[str, Any]) ->
     return cls.from_json(dirname, split, obj)
 
 
-__all__ = ['CSVWriter', 'JSONReader', 'JSONWriter', 'MDSReader', 'MDSWriter', 'TSVWriter', 'XSVWriter', 'reader_from_json']
+__all__ = ['CSVWriter', 'JSONReader', 'JSONWriter', 'MDSReader', 'MDSWriter', 'TSVWriter',
+           'XSVWriter', 'reader_from_json']
