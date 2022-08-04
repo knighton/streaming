@@ -2,7 +2,7 @@ import brotli
 import bz2
 import gzip
 import snappy
-from typing import Dict, Iterator, List, Optional, Set, Tuple, Type
+from typing import Iterator, Optional, Type
 from typing_extensions import Self
 import zstd
 
@@ -17,11 +17,11 @@ class Compression(object):
     extension: str  # Filename extension.
 
     @classmethod
-    def each(cls) -> Iterator[Tuple[str, Self]]:
+    def each(cls) -> Iterator[tuple[str, Self]]:
         """Get each instance of this compression algorithm family.
 
         Returns:
-            Iterator[Tuple[str, Self]]: Each level.
+            Iterator[tuple[str, Self]]: Each level.
         """
         yield cls.extension, cls()
 
@@ -55,13 +55,13 @@ class LevelledCompression(Compression):
         level (Optional[int], default: None): Compression level.
     """
 
-    levels: List  # Compression levels.
+    levels: list  # Compression levels.
 
     def __init__(self, level: Optional[int] = None) -> None:
         raise NotImplementedError
 
     @classmethod
-    def each(cls) -> Iterator[Tuple[str, Self]]:
+    def each(cls) -> Iterator[tuple[str, Self]]:
         yield cls.extension, cls()
         for level in cls.levels:
             yield f'{cls.extension}:{level}', cls(level)
@@ -157,14 +157,14 @@ _families = {
 }
 
 
-def _collect(families: Dict[str, Type[Compression]]) -> Dict[str, Compression]:
+def _collect(families: dict[str, Type[Compression]]) -> dict[str, Compression]:
     """Instantiate each level of each type of compression.
 
     Args:
-        Dict[str, Type[Compression]]: Mapping of extension to class.
+        dict[str, Type[Compression]]: Mapping of extension to class.
 
     Returns:
-        Dict[str, Compression]: Mapping of extension:level to instance.
+        dict[str, Compression]: Mapping of extension:level to instance.
     """
     algos = {}
     for cls in families.values():
@@ -177,7 +177,7 @@ def _collect(families: Dict[str, Type[Compression]]) -> Dict[str, Compression]:
 _algorithms = _collect(_families)
 
 
-def get_compressions() -> Set[str]:
+def get_compressions() -> set[str]:
     """List supported compression algorithms.
 
     Returns:

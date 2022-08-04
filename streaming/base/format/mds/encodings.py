@@ -3,7 +3,7 @@ import json
 import numpy as np
 from PIL import Image
 import pickle
-from typing import Any, Optional, Set
+from typing import Any, Optional
 
 
 __all__ = ['get_mds_encodings', 'is_mds_encoding', 'mds_encode', 'mds_decode',
@@ -152,11 +152,11 @@ _encodings = {
 }
 
 
-def get_mds_encodings() -> Set[str]:
+def get_mds_encodings() -> set[str]:
     """List supported encodings.
 
     Returns:
-        Set[str]: Encoding names.
+        set[str]: Encoding names.
     """
     return set(_encodings)
 
