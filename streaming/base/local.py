@@ -27,7 +27,7 @@ class LocalDataset(Dataset):
         self.index = Index(shard_sizes)
 
     def __len__(self) -> int:
-        return self.index.size
+        return self.index.total_samples
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
         shard_idx, idx_in_shard = self.index.find_sample(idx)

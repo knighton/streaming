@@ -61,6 +61,25 @@ from ..base.reader import FileInfo, SplitReader
 
 
 class JSONReader(SplitReader):
+    """Provides random access to the samples of a JSON shard.
+
+    Args:
+        dirname (str): Local dataset directory.
+        split (Optional[str]): Which dataset split to use, if any.
+        column_encodings (list[str]): Column encodings.
+        column_names (list[str]): Column names.
+        compression (Optional[str]): Optional compression or compression:level.
+        hashes (list[str]): Optional list of hash algorithms to apply to shard files.
+        newline (str): Newline character(s).
+        raw_data (FileInfo): Uncompressed data file info.
+        raw_meta (FileInfo): Uncompressed meta file info.
+        samples (int): Number of samples in this shard.
+        size_limit (Optional[int]): Optional shard size limit, after which point to start a new
+            shard. If None, puts everything in one shard.
+        zip_data (FileInfo): Compressed data file info.
+        zip_meta (FileInfo): Compressed meta file info.
+    """
+
     def __init__(
         self,
         dirname: str,

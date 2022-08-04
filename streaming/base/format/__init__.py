@@ -21,5 +21,4 @@ def reader_from_json(dirname: str, split: Optional[str], obj: dict[str, Any]) ->
     return cls.from_json(dirname, split, obj)
 
 
-__all__ = ['CSVWriter', 'JSONReader', 'JSONWriter', 'MDSReader', 'MDSWriter', 'TSVWriter',
-           'XSVWriter', 'reader_from_json']
+__all__ = ['CSVWriter', 'JSONWriter', 'MDSWriter', 'reader_from_json', 'TSVWriter', 'XSVWriter']

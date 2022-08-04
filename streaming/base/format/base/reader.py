@@ -1,11 +1,19 @@
+from dataclasses import dataclass
 from typing import Any, Iterator, Optional
 
 
+@dataclass
 class FileInfo(object):
-    def __init__(self, basename: str, bytes: int, hashes: dict[str, str]) -> None:
-        self.basename = basename
-        self.bytes = bytes
-        self.hashes = hashes
+    """File validation info.
+
+    Args:
+        basename (str): File basename.
+        bytes (int): File size in bytes.
+        hashes (dict[str, str]): Mapping of hash algorithm to hash value.
+    """
+    basename: str
+    bytes: int
+    hashes: dict[str, str]
 
 
 class Reader(object):
@@ -13,12 +21,12 @@ class Reader(object):
 
     Args:
         dirname (str): Local dataset directory.
-        compression (Optional[str], default: None): Optional compression or compression:level.
-        hashes (Optional[list[str]], default: None): Optional list of hash algorithms to apply to
-            shard files.
+        split (Optional[str]): Which dataset split to use, if any.
+        compression (Optional[str]): Optional compression or compression:level.
+        hashes (list[str]): Optional list of hash algorithms to apply to shard files.
         samples (int): Number of samples in this shard.
-        size_limit (Optional[int], default: 1 << 26): Optional shard size limit, after which point
-            to start a new shard. If None, puts everything in one shard.
+        size_limit (Optional[int]): Optional shard size limit, after which point to start a new
+            shard. If None, puts everything in one shard.
     """
 
     def __init__(
@@ -36,6 +44,8 @@ class Reader(object):
         self.hashes = hashes
         self.samples = samples
         self.size_limit = size_limit
+
+        self.file_pairs = []
 
     def __len__(self) -> int:
         """Get the number of samples in this shard.
@@ -94,13 +104,13 @@ class JointReader(Reader):
 
     Args:
         dirname (str): Local dataset directory.
-        compression (Optional[str], default: None): Optional compression or compression:level.
-        hashes (Optional[list[str]], default: None): Optional list of hash algorithms to apply to
-            shard files.
+        split (Optional[str]): Which dataset split to use, if any.
+        compression (Optional[str]): Optional compression or compression:level.
+        hashes (list[str]): Optional list of hash algorithms to apply to shard files.
         raw_data (FileInfo): Uncompressed data file info.
         samples (int): Number of samples in this shard.
-        size_limit (Optional[int], default: 1 << 26): Optional shard size limit, after which point
-            to start a new shard. If None, puts everything in one shard.
+        size_limit (Optional[int]): Optional shard size limit, after which point to start a new
+            shard. If None, puts everything in one shard.
         zip_data (FileInfo): Compressed data file info.
     """
     def __init__(
@@ -112,11 +122,12 @@ class JointReader(Reader):
         raw_data: FileInfo,
         samples: int,
         size_limit: Optional[int],
-        zip_data: FileInfo
+        zip_data: Optional[FileInfo]
     ) -> None:
         super().__init__(dirname, split, compression, hashes, samples, size_limit)
         self.raw_data = raw_data
         self.zip_data = zip_data
+        self.file_pairs.append((raw_data, zip_data))
 
 
 class SplitReader(Reader):
@@ -124,14 +135,14 @@ class SplitReader(Reader):
 
     Args:
         dirname (str): Local dataset directory.
-        compression (Optional[str], default: None): Optional compression or compression:level.
-        hashes (Optional[list[str]], default: None): Optional list of hash algorithms to apply to
-            shard files.
+        split (Optional[str]): Which dataset split to use, if any.
+        compression (Optional[str]): Optional compression or compression:level.
+        hashes (list[str]): Optional list of hash algorithms to apply to shard files.
         raw_data (FileInfo): Uncompressed data file info.
         raw_meta (FileInfo): Uncompressed meta file info.
         samples (int): Number of samples in this shard.
-        size_limit (Optional[int], default: 1 << 26): Optional shard size limit, after which point
-            to start a new shard. If None, puts everything in one shard.
+        size_limit (Optional[int]): Optional shard size limit, after which point to start a new
+            shard. If None, puts everything in one shard.
         zip_data (FileInfo): Compressed data file info.
         zip_meta (FileInfo): Compressed meta file info.
     """
@@ -145,11 +156,13 @@ class SplitReader(Reader):
         raw_meta: FileInfo,
         samples: int,
         size_limit: Optional[int],
-        zip_data: FileInfo,
-        zip_meta: FileInfo
+        zip_data: Optional[FileInfo],
+        zip_meta: Optional[FileInfo]
     ) -> None:
         super().__init__(dirname, split, compression, hashes, samples, size_limit)
         self.raw_data = raw_data
         self.raw_meta = raw_meta
         self.zip_data = zip_data
         self.zip_meta = zip_meta
+        self.file_pairs.append((raw_meta, zip_meta))
+        self.file_pairs.append((raw_data, zip_data))

@@ -66,6 +66,26 @@ from .encodings import xsv_decode
 
 
 class XSVReader(SplitReader):
+    """Provides random access to the samples of an XSV shard.
+
+    Args:
+        dirname (str): Local dataset directory.
+        split (Optional[str]): Which dataset split to use, if any.
+        column_encodings (list[str]): Column encodings.
+        column_names (list[str]): Column names.
+        compression (Optional[str]): Optional compression or compression:level.
+        hashes (list[str]): Optional list of hash algorithms to apply to shard files.
+        newline (str): Newline character(s).
+        raw_data (FileInfo): Uncompressed data file info.
+        raw_meta (FileInfo): Uncompressed meta file info.
+        samples (int): Number of samples in this shard.
+        separator (str): Separator character(s).
+        size_limit (Optional[int]): Optional shard size limit, after which point to start a new
+            shard. If None, puts everything in one shard.
+        zip_data (FileInfo): Compressed data file info.
+        zip_meta (FileInfo): Compressed meta file info.
+    """
+
     def __init__(
         self,
         dirname: str,
@@ -127,20 +147,112 @@ class XSVReader(SplitReader):
 
 
 class CSVReader(XSVReader):
+    """Provides random access to the samples of a CSV shard.
+
+    Args:
+        dirname (str): Local dataset directory.
+        split (Optional[str]): Which dataset split to use, if any.
+        column_encodings (list[str]): Column encodings.
+        column_names (list[str]): Column names.
+        compression (Optional[str]): Optional compression or compression:level.
+        hashes (list[str]): Optional list of hash algorithms to apply to shard files.
+        newline (str): Newline character(s).
+        raw_data (FileInfo): Uncompressed data file info.
+        raw_meta (FileInfo): Uncompressed meta file info.
+        samples (int): Number of samples in this shard.
+        size_limit (Optional[int]): Optional shard size limit, after which point to start a new
+            shard. If None, puts everything in one shard.
+        zip_data (FileInfo): Compressed data file info.
+        zip_meta (FileInfo): Compressed meta file info.
+    """
+
+    separator = ','
+
+    def __init__(
+        self,
+        dirname: str,
+        split: Optional[str],
+        column_encodings: list[str],
+        column_names: list[str],
+        compression: Optional[str],
+        hashes: list[str],
+        newline: str,
+        raw_data: FileInfo,
+        raw_meta: FileInfo,
+        samples: int,
+        size_limit: Optional[int],
+        zip_data: FileInfo,
+        zip_meta: FileInfo
+    ) -> None:
+        super().__init__(dirname, split, column_encodings, column_names, compression, hashes,
+                         newline, raw_data, raw_meta, samples, self.separator, size_limit, zip_data,
+                         zip_meta)
+
     @classmethod
     def from_json(cls, dirname: str, split: Optional[str], obj: dict[str, Any]) -> Self:
         args = deepcopy(obj)
+        assert args['version'] == 2
+        del args['version']
         assert args['format'] == 'csv'
-        args['format'] = 'xsv'
-        args['separator'] = ','
-        return super().from_json(dirname, split, args)
+        del args['format']
+        args['dirname'] = dirname
+        args['split'] = split
+        for key in ['raw_data', 'raw_meta', 'zip_data', 'zip_meta']:
+            args[key] = FileInfo(**args[key])
+        return cls(**args)
 
 
 class TSVReader(XSVReader):
+    """Provides random access to the samples of an XSV shard.
+
+    Args:
+        dirname (str): Local dataset directory.
+        split (Optional[str]): Which dataset split to use, if any.
+        column_encodings (list[str]): Column encodings.
+        column_names (list[str]): Column names.
+        compression (Optional[str]): Optional compression or compression:level.
+        hashes (list[str]): Optional list of hash algorithms to apply to shard files.
+        newline (str): Newline character(s).
+        raw_data (FileInfo): Uncompressed data file info.
+        raw_meta (FileInfo): Uncompressed meta file info.
+        samples (int): Number of samples in this shard.
+        size_limit (Optional[int]): Optional shard size limit, after which point to start a new
+            shard. If None, puts everything in one shard.
+        zip_data (FileInfo): Compressed data file info.
+        zip_meta (FileInfo): Compressed meta file info.
+    """
+
+    separator = '\t'
+
+    def __init__(
+        self,
+        dirname: str,
+        split: Optional[str],
+        column_encodings: list[str],
+        column_names: list[str],
+        compression: Optional[str],
+        hashes: list[str],
+        newline: str,
+        raw_data: FileInfo,
+        raw_meta: FileInfo,
+        samples: int,
+        size_limit: Optional[int],
+        zip_data: FileInfo,
+        zip_meta: FileInfo
+    ) -> None:
+        super().__init__(dirname, split, column_encodings, column_names, compression, hashes,
+                         newline, raw_data, raw_meta, samples, self.separator, size_limit, zip_data,
+                         zip_meta)
+
     @classmethod
     def from_json(cls, dirname: str, split: Optional[str], obj: dict[str, Any]) -> Self:
         args = deepcopy(obj)
+        assert args['version'] == 2
+        del args['version']
         assert args['format'] == 'tsv'
-        args['format'] = 'xsv'
-        args['separator'] = '\t'
-        return super().from_json(dirname, split, args)
+        del args['format']
+        args['dirname'] = dirname
+        args['split'] = split
+        for key in ['raw_data', 'raw_meta', 'zip_data', 'zip_meta']:
+            args[key] = FileInfo(**args[key])
+        return cls(**args)
