@@ -1,6 +1,7 @@
 import numpy as np
+from shutil import rmtree
 
-from streaming.base.format import CSVWriter, JSONWriter, MDSWriter, TSVWriter
+from streaming.base import CSVWriter, Dataset, JSONWriter, MDSWriter, TSVWriter
 
 
 ones = ('zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen ' +
@@ -56,21 +57,29 @@ def main():
     hashes = 'sha1', 'xxh3_64'
     size_limit = 1 << 20
 
-    with MDSWriter('data/mds', columns, compression, hashes, size_limit) as out:
+    with MDSWriter('/tmp/mds', columns, compression, hashes, size_limit) as out:
         for x in samples:
             out.write(x)
 
-    with CSVWriter('data/csv', columns, compression, hashes, size_limit) as out:
+    with CSVWriter('/tmp/csv', columns, compression, hashes, size_limit) as out:
         for x in samples:
             out.write(x)
 
-    with TSVWriter('data/tsv', columns, compression, hashes, size_limit) as out:
+    with TSVWriter('/tmp/tsv', columns, compression, hashes, size_limit) as out:
         for x in samples:
             out.write(x)
 
-    with JSONWriter('data/json', columns, compression, hashes, size_limit) as out:
+    with JSONWriter('/tmp/json', columns, compression, hashes, size_limit) as out:
         for x in samples:
             out.write(x)
+
+    for dirname in ['/tmp/mds', '/tmp/csv', '/tmp/tsv', '/tmp/json']:
+        dataset = Dataset(dirname, shuffle=False)
+        for gold, test in zip(samples, dataset):
+            assert gold == test
+
+    for dirname in ['/tmp/mds', '/tmp/csv', '/tmp/tsv', '/tmp/json']:
+        rmtree(dirname)
 
 
 main()
