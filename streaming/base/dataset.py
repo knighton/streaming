@@ -224,7 +224,7 @@ class Dataset(IterableDataset):
                     data = open(zip_filename, 'rb').read()
                     if self.hash:
                         assert get_hash(self.hash, data) == zip_info.hashes[self.hash]
-                    data = decompress(self.index.compression, data)  # pyright: ignore
+                    data = decompress(info.compression, data)  # pyright: ignore
                     with open(raw_filename, 'wb') as out:
                         out.write(data)
                     if not self.keep_zip:
@@ -323,7 +323,7 @@ class Dataset(IterableDataset):
                     data = open(zip_filename, 'rb').read()
                     if self.hash:
                         assert get_hash(self.hash, data) == zip_info.hashes[self.hash]
-                    data = decompress(self.index.compression, data)  # pyright: ignore
+                    data = decompress(info.compression, data)  # pyright: ignore
                     with open(raw_filename, 'wb') as out:
                         out.write(data)
                     if not self.keep_zip:
