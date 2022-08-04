@@ -6,6 +6,7 @@ from typing_extensions import Self
 
 from ...compression import compress, get_compression_extension, is_compression
 from ...hash import get_hash, is_hash
+from ...index import get_index_basename
 
 
 class Writer(object):
@@ -181,7 +182,7 @@ class Writer(object):
     def _write_index(self) -> None:
         """Write the index, having written all the shards."""
         assert not self.new_samples
-        filename = os.path.join(self.dirname, 'index.json')
+        filename = os.path.join(self.dirname, get_index_basename())
         obj = {
             'version': 2,
             'shards': self.shards,

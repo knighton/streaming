@@ -30,6 +30,6 @@ class LocalDataset(Dataset):
         return self.index.size
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
-        shard_idx, idx_in_shard = self.index.find(idx)
+        shard_idx, idx_in_shard = self.index.find_sample(idx)
         shard = self.shards[shard_idx]
         return shard[idx_in_shard]
