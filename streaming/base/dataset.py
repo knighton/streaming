@@ -31,7 +31,7 @@ class Dataset(IterableDataset):
         local (str): Local dataset directory where shards are cached by split.
         remote (Optional[str], default: None): Download shards from this remote path or directory.
             If None, this rank and workers' partition of the dataset must all exist locally.
-        split (str, default: ''): Which dataset split to use, if any.
+        split (Optional[str], default: None): Which dataset split to use, if any.
         shuffle (bool, default: True): Whether to shuffle the samples while iterating.
         prefetch (Optional[int], default: 100_000): Target number of samples remaining to prefetch
             while iterating.
@@ -89,7 +89,7 @@ class Dataset(IterableDataset):
         self,
         local: str,
         remote: Optional[str] = None,
-        split: str = '',
+        split: Optional[str] = None,
         shuffle: bool = True,
         prefetch: Optional[int] = 100_000,
         keep_zip: Optional[bool] = None,
@@ -103,7 +103,7 @@ class Dataset(IterableDataset):
 
         self.local = local
         self.remote = remote
-        self.split = split
+        self.split = split or ''
         self.shuffle = shuffle
         self.prefetch = prefetch
         self.keep_zip = keep_zip
