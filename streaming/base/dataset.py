@@ -200,6 +200,39 @@ class Dataset(IterableDataset):
         """
         self._load_shards([shard], partition)
 
+    def _preload_shard(self, shard: int) -> bool:
+        """Attempt to decompress and validate a single shard, returning whether it is present.
+
+        Args:
+            shard (int): Which shard.
+
+        Returns:
+            bool: Whether shard is present.
+        """
+        info = self.shards[shard]
+        for raw_info, zip_info in info.file_pairs:
+            raw_filename = os.path.join(self.local, self.split, raw_info.basename)
+            if os.path.isfile(raw_filename):
+                if self.hash:
+                    data = open(raw_filename, 'rb').read()
+                    assert get_hash(self.hash, data) == raw_info.hashes[self.hash]
+            elif not zip_info:
+                return False
+            else:
+                zip_filename = os.path.join(self.local, self.split, zip_info.basename)
+                if os.path.isfile(zip_filename):
+                    data = open(zip_filename, 'rb').read()
+                    if self.hash:
+                        assert get_hash(self.hash, data) == zip_info.hashes[self.hash]
+                    data = decompress(self.index.compression, data)  # pyright: ignore
+                    with open(raw_filename, 'wb') as out:
+                        out.write(data)
+                    if not self.keep_zip:
+                        os.remove(zip_filename)
+                else:
+                    return False
+        return True
+
     def _preload(self, partition: Partition) -> list[int]:
         """Load any shards that are cached locally, returning the list of missing shards.
 
@@ -224,32 +257,7 @@ class Dataset(IterableDataset):
         present_shards = []
         missing_shards = []
         for shard in partition.shards:
-            info = self.shards[shard]
-            is_present = True
-            for raw_info, zip_info in info.file_pairs:
-                raw_filename = os.path.join(self.local, self.split, raw_info.basename)
-                if os.path.isfile(raw_filename):
-                    if self.hash:
-                        data = open(raw_filename, 'rb').read()
-                        assert get_hash(self.hash, data) == raw_info.hashes[self.hash]
-                elif not zip_info:
-                    is_present = False
-                    break
-                else:
-                    zip_filename = os.path.join(self.local, self.split, zip_info.basename)
-                    if os.path.isfile(zip_filename):
-                        data = open(zip_filename, 'rb').read()
-                        if self.hash:
-                            assert get_hash(self.hash, data) == zip_info.hashes[self.hash]
-                        data = decompress(self.index.compression, data)  # pyright: ignore
-                        with open(raw_filename, 'wb') as out:
-                            out.write(data)
-                        if not self.keep_zip:
-                            os.remove(zip_filename)
-                    else:
-                        is_present = False
-                        break
-            if is_present:
+            if self._preload_shard(shard):
                 present_shards.append(shard)
             else:
                 missing_shards.append(shard)
