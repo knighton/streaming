@@ -3,7 +3,7 @@ import numpy as np
 from time import time
 from typing import Iterator
 
-from .hash import get_hash, get_hashes
+from .hashing import get_hash, get_hashes
 
 
 def parse_args() -> Namespace:

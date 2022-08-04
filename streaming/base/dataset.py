@@ -12,8 +12,8 @@ from .compression import decompress
 from . import distributed as dist
 from .download import download_or_wait
 from .format import reader_from_json
+from .hashing import get_hash
 from .index import get_index_basename, Index, Partition
-from .hash import get_hash
 
 
 class DownloadStatus(IntEnum):

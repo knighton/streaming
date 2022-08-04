@@ -5,7 +5,7 @@ from typing import Any, Optional, Type
 from typing_extensions import Self
 
 from ...compression import compress, get_compression_extension, is_compression
-from ...hash import get_hash, is_hash
+from ...hashing import get_hash, is_hash
 from ...index import get_index_basename
 
 
